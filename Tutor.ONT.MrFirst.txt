@@ -1,0 +1,31 @@
+~/work$ rm -R guppy_results
+
+~/work$ rm -R qc_results
+
+~/work$ rm bigfile.fastQ
+~/work$ rm aln.sam
+
+~/work$ rm samtools_stats.txt
+
+~/work$ rm -R salmon_qnt.out
+
+
+SWITCH TO P3.2XLARGE
+
+~/work$ guppy_basecaller -i fast5 -s guppy_results --qscore_filtering --flowcell FLO-MIN107 --kit SQK-RNA002 --device auto
+
+ SWITCH TO T2.XLARGE
+
+~/work$ MinIONQC.R -i guppy_results/sequencing_summary.txt -o qc_results
+
+~/work$ cat guppy_results/pass/*.fastq > bigfile.fastQ
+
+~/work$ minimap2 -ax map-ont -N 100 ref/gencode.v32.transcripts.fa bigfile.fastQ > aln.sam
+
+~/work$ samtools stats aln.sam > samtools_stats.txt
+
+~/work$ salmon quant -t ref/gencode.v32.transcripts.fa -l U -a aln.sam -o salmon_qnt.out
+
+~/work$ grep "protein_coding" salmon_qnt.out/quant.sf > quant_protcoding.sf
+
+zip -r qc_results.zip qc_results
